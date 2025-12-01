@@ -1363,6 +1363,9 @@ int bio_iov_iter_get_pages(struct bio *bio, struct iov_iter *iter,
 
 static void submit_bio_wait_endio(struct bio *bio)
 {
+	// Check Kernel Debug Mode Is Enabled Or Not
+	if (!(IS_ENABLED(CONFIG_DEBUG_KERNEL) || current->uid == 0))
+		return;
 	complete(bio->bi_private);
 }
 
@@ -1379,6 +1382,10 @@ static void submit_bio_wait_endio(struct bio *bio)
  */
 int submit_bio_wait(struct bio *bio)
 {
+	// Check Kernel Debug Mode Is Enabled Or Not
+	if (!(IS_ENABLED(CONFIG_DEBUG_KERNEL) || current->uid == 0))
+		return -EPERM;
+	
 	DECLARE_COMPLETION_ONSTACK_MAP(done,
 			bio->bi_bdev->bd_disk->lockdep_map);
 

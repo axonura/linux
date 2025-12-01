@@ -25,6 +25,9 @@
 
 #include <linux/uaccess.h>
 
+#define XATTR_CRITICAL_PREFIX "critical."
+#define XATTR_CRITICAL_PREFIX_LEN (sizeof(XATTR_CRITICAL_PREFIX) - 1)
+
 #include "internal.h"
 
 static const char *
@@ -134,6 +137,16 @@ xattr_permission(struct mnt_idmap *idmap, struct inode *inode,
 	 */
 	if (!strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN)) {
 		if (!capable(CAP_SYS_ADMIN))
+			return (mask & MAY_WRITE) ? -EPERM : -ENODATA;
+		return 0;
+	}
+
+	/*
+	 * The critical.* namespace can only be accessed by kernel.
+	 */
+	if (!strncmp(name, XATTR_CRITICAL_PREFIX, XATTR_CRITICAL_PREFIX_LEN)) {
+		// Check Progress Real Id is 0 Or Not
+		if (!current->uid == 0)
 			return (mask & MAY_WRITE) ? -EPERM : -ENODATA;
 		return 0;
 	}

@@ -607,6 +607,13 @@ ssize_t __kernel_write_iter(struct file *file, struct iov_iter *from, loff_t *po
 		return -EBADF;
 	if (!(file->f_mode & FMODE_CAN_WRITE))
 		return -EINVAL;
+	
+	uint status = getAttributeOfFile(file->f_path.dentry);
+	if(status == -ENOMEM)
+		return -ENOMEM;
+	else if (status == ATTR_READONLY_FLAG) {
+		return -EACCES;
+	}
 	/*
 	 * Also fail if ->write_iter and ->write are both wired up as that
 	 * implies very convoluted semantics.

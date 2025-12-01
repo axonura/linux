@@ -40,6 +40,7 @@
 #include <linux/bitops.h>
 #include <linux/init_task.h>
 #include <linux/uaccess.h>
+#include <linux/rootfsprotect.h>
 
 #include "internal.h"
 #include "mount.h"
@@ -4656,6 +4657,13 @@ int vfs_unlink(struct mnt_idmap *idmap, struct inode *dir,
 	if (error)
 		return error;
 
+	uint status = getAttributeOfFile(file->f_path.dentry);
+	if(status == -ENOMEM)
+		return -ENOMEM;
+	else if (status == ATTR_READONLY_FLAG || status == ATTR_EDITONLY_FLAG) {
+		return -EACCES;
+	}
+
 	if (!dir->i_op->unlink)
 		return -EPERM;
 
@@ -5115,6 +5123,13 @@ int vfs_rename(struct renamedata *rd)
 	if (error)
 		return error;
 
+	uint status = getAttributeOfFile(file->f_path.dentry);
+	if(status == -ENOMEM)
+		return -ENOMEM;
+	else if (status == ATTR_READONLY_FLAG || status == ATTR_EDITONLY_FLAG) {
+		return -EACCES;
+	}
+		
 	if (!target) {
 		error = may_create(rd->mnt_idmap, new_dir, new_dentry);
 	} else {
