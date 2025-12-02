@@ -17,7 +17,7 @@
 #include <linux/capability.h>
 #include <linux/rootfsprotect.h>
 
-#define XATTR_NAME_FULL "trusted.critical.system"
+#define XATTR_NAME "critical.system"
 
 /*
  * List of Linux filesystems with xattr support:
@@ -105,7 +105,7 @@ unsigned int getAttributeOfFile(struct dentry *dentry) {
      * Works with: ext4, XFS, Btrfs, F2FS, ReiserFS, JFS, UBIFS, ZFS,
      * TMPFS, NFS (5.9+), CIFS, NTFS3, and other xattr-capable filesystems
      */
-    ret = vfs_getxattr(&nop_mnt_idmap, dentry, XATTR_NAME_FULL, 
+    ret = vfs_getxattr(&nop_mnt_idmap, dentry, XATTR_NAME, 
                        value_buf, sizeof(value_buf));
     
     /* Handle various error conditions */
@@ -209,7 +209,7 @@ int setAttributeOfFile(struct dentry *dentry, unsigned int attr_value) {
      * ext2/3/4, XFS, Btrfs, ReiserFS, JFS, F2FS, SquashFS, UBIFS,
      * ZFS, TMPFS, NFS, CIFS, NTFS3, etc.
      */
-    result = vfs_setxattr(&nop_mnt_idmap, dentry, XATTR_NAME_FULL, 
+    result = vfs_setxattr(&nop_mnt_idmap, dentry, XATTR_NAME, 
                           value_buf, value_size, 0);
     
     /* Handle various error conditions */
@@ -303,7 +303,7 @@ int removeAttributeOfFile(struct dentry *dentry) {
     /* Attempt to remove extended attribute from trusted namespace
      * Works across all xattr-capable filesystems
      */
-    result = vfs_removexattr(&nop_mnt_idmap, dentry, XATTR_NAME_FULL);
+    result = vfs_removexattr(&nop_mnt_idmap, dentry, XATTR_NAME);
     
     if (result == 0) {
         pr_info("rootfsprotect: Removed attribute from inode %lu (fs: %s)\n", 
