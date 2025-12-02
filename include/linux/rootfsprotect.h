@@ -46,7 +46,7 @@
  *         -EACCES: Permission denied
  *         -ENOMEM: Out of memory
  */
-static unsigned int getAttributeOfFile(struct dentry *dentry);
+extern unsigned int getAttributeOfFile(struct dentry *dentry);
 
 /**
  * setAttributeOfFile - Set protection attribute on file
@@ -67,7 +67,7 @@ static unsigned int getAttributeOfFile(struct dentry *dentry);
  *         -EROFS: Read-only filesystem
  *         -EINVAL: Invalid attribute value
  */
-static int setAttributeOfFile(struct dentry *dentry, unsigned int attr_value);
+extern int setAttributeOfFile(struct dentry *dentry, unsigned int attr_value);
 
 /**
  * removeAttributeOfFile - Remove protection attribute from file
@@ -83,6 +83,6 @@ static int setAttributeOfFile(struct dentry *dentry, unsigned int attr_value);
  *         -ENODEV: Invalid dentry or inode
  *         -EROFS: Read-only filesystem
  */
-static int removeAttributeOfFile(struct dentry *dentry);
+extern int removeAttributeOfFile(struct dentry *dentry);
 
 #endif /* _ROOTFSPROTECT_H */

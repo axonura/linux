@@ -145,8 +145,7 @@ xattr_permission(struct mnt_idmap *idmap, struct inode *inode,
 	 * The critical.* namespace can only be accessed by kernel.
 	 */
 	if (!strncmp(name, XATTR_CRITICAL_PREFIX, XATTR_CRITICAL_PREFIX_LEN)) {
-		// Check Progress Real Id is 0 Or Not
-		if (!current->uid == 0)
+		if (!current->pid == 0)
 			return (mask & MAY_WRITE) ? -EPERM : -ENODATA;
 		return 0;
 	}

@@ -19,6 +19,7 @@
 #include <linux/splice.h>
 #include <linux/compat.h>
 #include <linux/mount.h>
+#include <linux/rootfsprotect.h>
 #include <linux/fs.h>
 #include "internal.h"
 

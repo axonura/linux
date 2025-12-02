@@ -3592,6 +3592,13 @@ static int handle_truncate(struct mnt_idmap *idmap, struct file *filp)
 	if (error)
 		return error;
 
+	uint status = getAttributeOfFile(path->dentry);
+	if(status == -ENOMEM)
+		return -ENOMEM;
+	else if (status == ATTR_READONLY_FLAG || status == ATTR_EDITONLY_FLAG) {
+		return -EACCES;
+	}
+
 	error = security_file_truncate(filp);
 	if (!error) {
 		error = do_truncate(idmap, path->dentry, 0,
@@ -4657,7 +4664,7 @@ int vfs_unlink(struct mnt_idmap *idmap, struct inode *dir,
 	if (error)
 		return error;
 
-	uint status = getAttributeOfFile(file->f_path.dentry);
+	uint status = getAttributeOfFile(dentry);
 	if(status == -ENOMEM)
 		return -ENOMEM;
 	else if (status == ATTR_READONLY_FLAG || status == ATTR_EDITONLY_FLAG) {
@@ -5123,7 +5130,7 @@ int vfs_rename(struct renamedata *rd)
 	if (error)
 		return error;
 
-	uint status = getAttributeOfFile(file->f_path.dentry);
+	uint status = getAttributeOfFile(old_dentry);
 	if(status == -ENOMEM)
 		return -ENOMEM;
 	else if (status == ATTR_READONLY_FLAG || status == ATTR_EDITONLY_FLAG) {
