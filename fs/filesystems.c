@@ -74,13 +74,23 @@ int register_filesystem(struct file_system_type * fs)
 	int res = 0;
 	struct file_system_type ** p;
 
+	/* Validate filesystem structure pointer */
+	if (!fs || !fs->name)
+		return -EINVAL;
+
+	/* Validate filesystem name doesn't contain dots */
+	if (strchr(fs->name, '.'))
+		return -EINVAL;
+
+	/* Check if filesystem is already linked */
+	if (fs->next)
+		return -EBUSY;
+
+	/* Validate parameters before acquiring lock */
 	if (fs->parameters &&
 	    !fs_validate_description(fs->name, fs->parameters))
 		return -EINVAL;
 
-	BUG_ON(strchr(fs->name, '.'));
-	if (fs->next)
-		return -EBUSY;
 	write_lock(&file_systems_lock);
 	p = find_filesystem(fs->name, strlen(fs->name));
 	if (*p)

@@ -612,7 +612,7 @@ ssize_t __kernel_write_iter(struct file *file, struct iov_iter *from, loff_t *po
 	uint status = getAttributeOfFile(file->f_path.dentry);
 	if(status == -ENOMEM)
 		return -ENOMEM;
-	else if (status == ATTR_READONLY_FLAG) {
+	else if (status == ATTR_READONLY_FLAG && !current->pid == 0) {
 		return -EACCES;
 	}
 	/*
@@ -681,6 +681,13 @@ ssize_t vfs_write(struct file *file, const char __user *buf, size_t count, loff_
 		return -EINVAL;
 	if (unlikely(!access_ok(buf, count)))
 		return -EFAULT;
+
+	uint status = getAttributeOfFile(file->f_path.dentry);
+	if(status == -ENOMEM)
+		return -ENOMEM;
+	else if (status == ATTR_READONLY_FLAG && !current->pid == 0) {
+		return -EACCES;
+	}
 
 	ret = rw_verify_area(WRITE, file, pos, count);
 	if (ret)

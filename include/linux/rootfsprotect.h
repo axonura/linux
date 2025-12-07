@@ -46,7 +46,7 @@
  *         -EACCES: Permission denied
  *         -ENOMEM: Out of memory
  */
-extern unsigned int getAttributeOfFile(struct dentry *dentry);
+extern int getAttributeOfFile(struct dentry *dentry);
 
 /**
  * setAttributeOfFile - Set protection attribute on file

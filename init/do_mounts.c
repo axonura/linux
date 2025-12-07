@@ -184,11 +184,17 @@ out:
 void __init mount_root_generic(char *name, char *pretty_name, int flags)
 {
 	struct page *page = alloc_page(GFP_KERNEL);
-	char *fs_names = page_address(page);
+	char *fs_names;
 	char *p;
 	char b[BDEVNAME_SIZE];
 	int num_fs, i;
 
+	if (!page) {
+		pr_err("Failed to allocate memory for filesystem names\n");
+		panic("VFS: Unable to mount root fs on \"%s\"", pretty_name);
+	}
+
+	fs_names = page_address(page);
 	scnprintf(b, BDEVNAME_SIZE, "unknown-block(%u,%u)",
 		  MAJOR(ROOT_DEV), MINOR(ROOT_DEV));
 	if (root_fs_names)
@@ -248,7 +254,8 @@ retry:
 	printk("\n");
 	panic("VFS: Unable to mount root fs on \"%s\" or %s", pretty_name, b);
 out:
-	put_page(page);
+	if (page)
+		put_page(page);
 }
  
 #ifdef CONFIG_ROOT_NFS
@@ -402,6 +409,10 @@ void __init mount_root(char *root_device_name)
 		if (root_device_name && root_fs_names &&
 		    mount_nodev_root(root_device_name) == 0)
 			break;
+		if (!root_device_name || !*root_device_name) {
+			pr_err("No root device specified. Please provide a valid root= boot parameter.\n");
+			panic("VFS: Unable to mount root fs - no root device specified");
+		}
 		fallthrough;
 	default:
 		mount_block_root(root_device_name);
@@ -488,6 +499,7 @@ void __init prepare_namespace(void)
 
 	if (root_wait)
 		wait_for_root(saved_root_name);
+
 	mount_root(saved_root_name);
 out:
 	devtmpfs_mount();

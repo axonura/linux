@@ -72,7 +72,7 @@ static inline int fs_supports_xattr(struct super_block *sb)
  * ext2/3/4, XFS, Btrfs, ReiserFS, JFS, F2FS, SquashFS, UBIFS,
  * ZFS, TMPFS, NFS (5.9+), CIFS, NTFS3, and FUSE implementations
  */
-unsigned int getAttributeOfFile(struct dentry *dentry) {
+int getAttributeOfFile(struct dentry *dentry) {
     ssize_t ret;
     struct inode *inode;
     struct super_block *sb;
