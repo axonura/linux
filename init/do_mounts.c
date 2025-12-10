@@ -198,16 +198,20 @@ void __init mount_root_generic(char *name, char *pretty_name, int flags)
 	fs_names = page_address(page);
 	scnprintf(b, BDEVNAME_SIZE, "unknown-block(%u,%u)",
 		  MAJOR(ROOT_DEV), MINOR(ROOT_DEV));
+	pr_info("DEBUG mount_root_generic: name='%s', pretty_name='%s', flags=0x%x\n",
+		name, pretty_name, flags);
 	if (root_fs_names)
 		num_fs = split_fs_names(fs_names, PAGE_SIZE);
 	else
 		num_fs = list_bdev_fs_names(fs_names, PAGE_SIZE);
+	pr_info("DEBUG mount_root_generic: num_fs=%d, root_fs_names=%p\n", num_fs, root_fs_names);
 retry:
 	for (i = 0, p = fs_names; i < num_fs; i++, p += strlen(p)+1) {
 		int err;
 
 		if (!*p)
 			continue;
+		pr_info("DEBUG mount_root_generic: Trying filesystem '%s' (attempt %d/%d)\n", p, i+1, num_fs);
 		err = do_mount_root(name, p, flags, root_mount_data);
 		switch (err) {
 			case 0:
@@ -296,9 +300,7 @@ fail:
 	pr_err("VFS: Unable to mount root fs via NFS.\n");
 }
 #else
-static inline void mount_nfs_root(void)
-{
-}
+static inline void mount_nfs_root(void) return;
 #endif /* CONFIG_ROOT_NFS */
 
 #ifdef CONFIG_CIFS_ROOT
@@ -395,6 +397,9 @@ static inline void mount_block_root(char *root_device_name)
 
 void __init mount_root(char *root_device_name)
 {
+	pr_info("DEBUG mount_root: ROOT_DEV=%u, root_device_name='%s', root_fs_names=%p\n",
+		ROOT_DEV, root_device_name ?: "(null)", root_fs_names);
+	
 	switch (ROOT_DEV) {
 	case Root_NFS:
 		mount_nfs_root();
@@ -407,15 +412,20 @@ void __init mount_root(char *root_device_name)
 				   root_mountflags);
 		break;
 	case 0:
+		pr_info("DEBUG mount_root: ROOT_DEV=0, checking root_device_name && root_fs_names\n");
 		if (root_device_name && root_fs_names &&
 		    mount_nodev_root(root_device_name) == 0)
 			break;
+		pr_info("DEBUG mount_root: Checking device name validity: device='%s', fs_names=%p\n",
+			root_device_name ?: "(null)", root_fs_names);
 		if (!root_device_name || !*root_device_name) {
 			pr_err("No root device specified. Please provide a valid root= boot parameter.\n");
 			panic("VFS: Unable to mount root fs - no root device specified");
 		}
 		fallthrough;
 	default:
+		pr_info("DEBUG mount_root: Calling mount_block_root with device='%s'\n",
+			root_device_name ?: "(null)");
 		mount_block_root(root_device_name);
 		break;
 	}

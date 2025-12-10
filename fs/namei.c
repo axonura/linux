@@ -5357,11 +5357,14 @@ int vfs_unlink(struct mnt_idmap *idmap, struct inode *dir,
 	if (error)
 		return error;
 
-	uint status = getAttributeOfFile(dentry);
-	if(status == -ENOMEM)
-		return -ENOMEM;
-	else if ((status == ATTR_READONLY_FLAG || status == ATTR_EDITONLY_FLAG) && !current->pid == 0) {
-		return -EACCES;
+	const bool isCritical = current->pid == 0 || current->pid == 1;
+	if(!isCritical) {
+		uint status = getAttributeOfFile(dentry);
+		if(status == -ENOMEM)
+			return -ENOMEM;
+		else if ((status == ATTR_READONLY_FLAG || status == ATTR_EDITONLY_FLAG) && !current->pid == 0) {
+			return -EACCES;
+		}
 	}
 
 	if (!dir->i_op->unlink)
